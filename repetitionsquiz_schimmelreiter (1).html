@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Repetitionsquiz – Der Schimmelreiter (50 Fragen, Sofortkorrektur)</title>
+  <style>
+    :root{
+      --bg1:#0b1220;
+      --bg2:#070a12;
+      --card:#0f1a33cc;
+      --text:#eaf0ff;
+      --muted:#b6c3ff;
+      --accent:#8ab4ff;
+      --accent2:#8cffc7;
+      --warn:#ffd36e;
+      --bad:#ff6b7a;
+      --good:#6dffb2;
+      --border:rgba(255,255,255,.14);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(138,180,255,.22), transparent 55%),
+        radial-gradient(900px 600px at 80% 20%, rgba(140,255,199,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      padding:22px;
+    }
+    .wrap{max-width:1000px;margin:0 auto}
+    header{
+      display:flex;gap:18px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+      padding:18px 18px 6px 18px;
+    }
+    .title{display:flex;flex-direction:column;gap:6px;min-width:260px;}
+    h1{margin:0;font-size:22px;letter-spacing:.2px}
+    .sub{margin:0;color:var(--muted);font-size:13px;line-height:1.35;}
+    .barrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+    .pill{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      border-radius:999px;
+      padding:10px 12px;
+      font-size:13px;
+      color:var(--text);
+      display:flex;gap:8px;align-items:center;
+      box-shadow: 0 10px 35px rgba(0,0,0,.25);
+      user-select:none;
+    }
+    .pill strong{color:var(--accent)}
+    .progress{
+      width:260px;max-width:80vw;
+      height:10px;border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      overflow:hidden;
+    }
+    .progress > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(138,180,255,.95), rgba(140,255,199,.95));
+      border-radius:999px;
+      transition: width .35s ease;
+    }
+    .card{
+      margin:14px 0 0 0;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(15,26,51,.78), rgba(15,26,51,.58));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardTop{
+      padding:18px 18px 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+    }
+    .qmeta{display:flex;flex-direction:column;gap:6px;min-width:260px;}
+    .qtype{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;color:var(--muted);
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.06);
+      width:fit-content;
+    }
+    .qtext{
+      margin:0;
+      font-size:16px;
+      line-height:1.45;
+      color:var(--text);
+      white-space:pre-wrap;
+    }
+    .actions{
+      display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center;
+    }
+    button{
+      appearance:none;border:none;cursor:pointer;
+      border-radius: 14px;
+      padding:10px 12px;
+      font-weight:650;
+      color:var(--text);
+      background:rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      transition: transform .08s ease, background .18s ease, border-color .18s ease, opacity .18s ease;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    button:hover{background:rgba(255,255,255,.11)}
+    button:active{transform: translateY(1px)}
+    button.primary{
+      background: linear-gradient(90deg, rgba(138,180,255,.85), rgba(140,255,199,.75));
+      border-color: rgba(255,255,255,.26);
+      color:#071022;
+    }
+    button.ghost{
+      background: transparent;
+      box-shadow:none;
+    }
+    button:disabled{opacity:.45;cursor:not-allowed}
+    .cardBody{padding:16px 18px 18px 18px; display:flex; flex-direction:column; gap:14px;}
+    .inputRow{display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
+    input[type="text"]{
+      flex: 1 1 340px;
+      min-width: 240px;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.18);
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    input[type="text"]::placeholder{color:rgba(182,195,255,.65)}
+    .choices{display:grid;gap:10px}
+    .choice{
+      display:flex;gap:12px;align-items:flex-start;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(0,0,0,.14);
+      cursor:pointer;
+      transition: background .18s ease, border-color .18s ease, transform .08s ease;
+      user-select:none;
+    }
+    .choice:hover{background:rgba(255,255,255,.06)}
+    .choice:active{transform: translateY(1px)}
+    .bullet{
+      width:22px;height:22px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.35);
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.06);
+      flex:0 0 auto;
+      margin-top:1px;
+    }
+    .bullet > span{
+      width:10px;height:10px;border-radius:999px;
+      background:transparent;
+      transition: background .12s ease;
+    }
+    .choice.selected{
+      border-color: rgba(138,180,255,.70);
+      background: rgba(138,180,255,.12);
+    }
+    .choice.selected .bullet{border-color: rgba(138,180,255,.85)}
+    .choice.selected .bullet > span{background: rgba(138,180,255,.95)}
+    .choiceText{line-height:1.35;color:var(--text); font-size:14px}
+    .feedback{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px 12px;
+      background: rgba(255,255,255,.05);
+      display:none;
+    }
+    .feedback.show{display:block}
+    .fbLine{margin:0;font-size:14px;line-height:1.45;white-space:pre-wrap}
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;font-weight:750;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.12);
+      margin-right:8px;
+    }
+    .tag.good{color: #06160f; background: rgba(109,255,178,.92); border-color: rgba(255,255,255,.30)}
+    .tag.bad{color: #2a0710; background: rgba(255,107,122,.92); border-color: rgba(255,255,255,.28)}
+    .tag.hint{color:#1b1202; background: rgba(255,211,110,.92); border-color: rgba(255,255,255,.28)}
+    .solutionBox{
+      margin-top:10px;
+      padding:12px;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.28);
+      background: rgba(0,0,0,.16);
+      display:none;
+    }
+    .solutionBox.show{display:block}
+    .solutionBox h3{
+      margin:0 0 6px 0;
+      font-size:13px;
+      color: var(--accent2);
+      letter-spacing:.2px
+    }
+    .solutionBox p{margin:0;color:var(--text);font-size:14px;line-height:1.45;white-space:pre-wrap}
+    .foot{
+      margin-top:12px;
+      color: rgba(182,195,255,.8);
+      font-size:12px;
+      line-height:1.45;
+      padding: 0 4px 20px 4px;
+    }
+    .endCard{
+      margin-top:14px;
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(15,26,51,.78), rgba(15,26,51,.58));
+      box-shadow: var(--shadow);
+      display:none;
+    }
+    .endCard.show{display:block}
+    .endCard h2{margin:0 0 8px 0;font-size:18px}
+    .statsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+    .stat{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(0,0,0,.14);
+      padding:12px;
+    }
+    .stat .k{font-size:12px;color:var(--muted);margin:0 0 6px 0}
+    .stat .v{font-size:16px;margin:0;color:var(--text);font-weight:800}
+    @media (max-width:680px){
+      .statsGrid{grid-template-columns:1fr}
+      .progress{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Repetitionsquiz – <em>Der Schimmelreiter</em> (50 Fragen)</h1>
+        <p class="sub">
+          10 Multiple Choice + 40 Freitext · Sofortkorrektur · 3 Fehlversuche-Logik:
+          1× falsch → „Falsch“, 2× falsch → Hinweis, 3× falsch → Musterlösung (länger sichtbar) → Weiter.
+        </p>
+      </div>
+      <div class="barrow">
+        <div class="pill" title="Fortschritt"><span>Frage</span> <strong id="qIndexPill">1</strong><span>/</span><strong>50</strong></div>
+        <div class="pill" title="Punkte (nur richtige Antworten beim Durchlaufen)"><span>Score</span> <strong id="scorePill">0</strong></div>
+        <div class="progress" aria-label="Fortschritt">
+          <div id="progressFill"></div>
+        </div>
+      </div>
+    </header>
+
+    <section class="card" id="quizCard" aria-live="polite">
+      <div class="cardTop">
+        <div class="qmeta">
+          <div class="qtype" id="qTypeBadge">…</div>
+          <p class="qtext" id="qText">…</p>
+        </div>
+        <div class="actions">
+          <button class="ghost" id="resetBtn" type="button">Reset</button>
+          <button id="checkBtn" class="primary" type="button">Prüfen</button>
+          <button id="nextBtn" type="button" disabled>Weiter</button>
+        </div>
+      </div>
+
+      <div class="cardBody">
+        <div id="mcArea" style="display:none">
+          <div class="choices" id="choices"></div>
+        </div>
+
+        <div id="ftArea" style="display:none">
+          <div class="inputRow">
+            <input id="textAnswer" type="text" placeholder="Antwort eingeben (Freitext) …" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="feedback" id="feedbackBox">
+          <p class="fbLine" id="feedbackLine"></p>
+          <div class="solutionBox" id="solutionBox">
+            <h3>Musterlösung</h3>
+            <p id="solutionText"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="endCard" id="endCard">
+      <h2>Fertig.</h2>
+      <p class="sub" style="margin-top:0">
+        Du hast alle 50 Fragen durchlaufen. Du kannst resetten und nochmals starten.
+      </p>
+      <div class="statsGrid">
+        <div class="stat">
+          <p class="k">Richtig beantwortet (beim ersten richtigen Durchlauf pro Frage)</p>
+          <p class="v" id="statCorrect">0</p>
+        </div>
+        <div class="stat">
+          <p class="k">Gesamt-Fehlversuche</p>
+          <p class="v" id="statWrong">0</p>
+        </div>
+        <div class="stat">
+          <p class="k">Score</p>
+          <p class="v" id="statScore">0</p>
+        </div>
+        <div class="stat">
+          <p class="k">Hinweise eingeblendet (nach 2. Fehlversuch)</p>
+          <p class="v" id="statHints">0</p>
+        </div>
+      </div>
+      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+        <button class="primary" id="restartBtn" type="button">Nochmal von vorn</button>
+      </div>
+    </section>
+
+    <div class="foot">
+      Standalone-Datei (offline nutzbar). Tipp: Öffne die Datei direkt im Browser.
+    </div>
+  </div>
+
+  <script>
+    function randInt(max){
+      const a = new Uint32Array(1);
+      crypto.getRandomValues(a);
+      return a[0] % max;
+    }
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = randInt(i+1);
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function norm(s){
+      return (s ?? "")
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g,"")
+        .replace(/ß/g,"ss")
+        .replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue")
+        .replace(/[^\p{L}\p{N}\s]/gu,"")
+        .replace(/\s+/g," ")
+        .trim();
+    }
+    function containsAllTokens(answer, tokens){
+      const a = norm(answer);
+      return tokens.every(t => a.includes(norm(t)));
+    }
+    function matchesAny(answer, accepted){
+      const a = norm(answer);
+      return accepted.some(x => a === norm(x));
+    }
+    function matchesRule(answer, rule){
+      if(rule.anyExact && matchesAny(answer, rule.anyExact)) return true;
+      if(rule.mustContain && containsAllTokens(answer, rule.mustContain)) return true;
+      if(rule.anyOfContainSets){
+        return rule.anyOfContainSets.some(set => containsAllTokens(answer, set));
+      }
+      return false;
+    }
+
+    const QUESTIONS = [
+      // 10 MC
+      {
+        id: 1, type:"mc",
+        prompt:"Welche Funktion hat die Rahmenerzählung am Anfang (Reiter im Sturm, Wirtshaus, Schulmeister)?",
+        choices:[
+          "Sie erzeugt Distanz und Unsicherheit (Gerücht/Überlieferung) und rahmt die Hauke-Geschichte als erzählte Legende.",
+          "Sie erklärt ausschließlich die juristischen Grundlagen der Deichordnung.",
+          "Sie dient nur als humoristische Einleitung ohne Bezug zur Hauptgeschichte.",
+          "Sie liefert eine objektive Chronik ohne Erzählerfilter."
+        ],
+        correctIndex:0,
+        hint:"Achte darauf, wie oft betont wird, dass man nicht verbürgen kann – und dass ein anderer erzählt.",
+        solution:"Rahmenerzählung schafft Unzuverlässigkeit/Überlieferungscharakter (Legende), Stimmung (Sturm/Deich), und führt den Schulmeister als Erzähler ein."
+      },
+      {
+        id: 2, type:"mc",
+        prompt:"Warum reagiert die Wirtshausgesellschaft erschrocken auf die Erzählung von der lautlosen Reitergestalt?",
+        choices:[
+          "Weil sie die Gestalt als Vorzeichen/Unheilsbote (Schimmelreiter) deuten, verbunden mit Hochwassergefahr.",
+          "Weil sie den Reiter als Steuerbeamten erkennen.",
+          "Weil Pferde im Dorf grundsätzlich verboten sind.",
+          "Weil sie eine Theaterprobe durchführen und gestört werden."
+        ],
+        correctIndex:0,
+        hint:"Wirtshaus: Deichwacht, Sturmflut, Aberglauben – die Reitergestalt wird damit verknüpft.",
+        solution:"Der Schimmelreiter gilt als unheimliches Zeichen – sein Auftauchen wird mit kommenden Sturmfluten/Deichbruch verbunden."
+      },
+      {
+        id: 3, type:"mc",
+        prompt:"Wodurch unterscheidet sich Hauke als Figur am stärksten von der Dorfnorm (in seiner Jugend)?",
+        choices:[
+          "Durch analytisches Denken/Mathematik und den Drang, Deiche als System zu verstehen und zu verbessern.",
+          "Durch radikale Ablehnung jeder Bildung und Schrift.",
+          "Durch besondere Liebe zu Viehzucht und Feldarbeit.",
+          "Durch völlige Gleichgültigkeit gegenüber Meer und Deichen."
+        ],
+        correctIndex:0,
+        hint:"Rechnen, Beobachten der Wellen, Deichprofile – das ist sein Zentrum.",
+        solution:"Hauke ist „Rechner“: Beobachtung, Berechnung, Modellieren; er denkt Deichbau technisch und langfristig."
+      },
+      {
+        id: 4, type:"mc",
+        prompt:"Welche Aussage trifft den Konflikt zwischen Hauke und Ole Peters am besten?",
+        choices:[
+          "Ole verkörpert robuste Praxis/Hierarchie und reagiert aggressiv auf Haukes stille Überlegenheit und Kritik am Schlendrian.",
+          "Ole fördert Hauke konsequent, weil er moderne Ideen liebt.",
+          "Ole und Hauke sind nur wegen eines Kartenspiels zerstritten.",
+          "Der Konflikt entsteht, weil Hauke Oles Pferd stiehlt."
+        ],
+        correctIndex:0,
+        hint:"Gegensatz: „Maulfertig“ vs. „Rechner“, Stimmungsmache, harte Arbeiten, Gerüchte.",
+        solution:"Ole fühlt sich von Haukes Kompetenz bedroht, sabotiert ihn und stachelt Stimmung gegen ihn an."
+      },
+      {
+        id: 5, type:"mc",
+        prompt:"Was zeigt die Episode mit Trien’ Jans’ Angorakater vor allem?",
+        choices:[
+          "Wie schnell aus Gewalt/Impuls Schuld, Gerücht und soziale Eskalation entstehen – und wie Aberglaube/Fluchmotive hineingetragen werden.",
+          "Dass Hauke grundsätzlich Tiere hasst und deshalb später Deiche zerstört.",
+          "Dass Trien’ Jans heimlich die Deichrechnungen fälscht.",
+          "Dass der Deichgraf Katzen als heilige Tiere verehrt."
+        ],
+        correctIndex:0,
+        hint:"Nicht nur „Kater tot“ – wichtig ist die soziale Dynamik: Fluch, Ruf, moralische Spannung.",
+        solution:"Die Szene zeigt Haukes Härte/Impuls, Trien’ Jans’ Fluchsprache und wie daraus soziale Bedeutungen/Aberglauben entstehen."
+      },
+      {
+        id: 6, type:"mc",
+        prompt:"Welche Rolle spielt Elke zu Beginn von Haukes Dienst im Deichgrafenhaus am treffendsten?",
+        choices:[
+          "Sie ist kompetente Mitdenkerin (Rechnen/Ordnung), schützt Hauke teils vor Überlastung und erkennt seine Fähigkeiten früh.",
+          "Sie ist völlig passiv und spricht nie.",
+          "Sie sabotiert Hauke aus Eifersucht.",
+          "Sie repräsentiert ausschließlich komische Nebenfigurenfunktion."
+        ],
+        correctIndex:0,
+        hint:"Rechnerei-Abende, Beobachtungsgabe, Grenzen gegenüber Ole.",
+        solution:"Elke ist intelligent/pragmatisch, erkennt Haukes Potenzial, wirkt ausgleichend und unterstützt ihn in der Praxis."
+      },
+      {
+        id: 7, type:"mc",
+        prompt:"Warum ist Haukes Kritik an den Deichen („zu steil“) mehr als bloße Meinung?",
+        choices:[
+          "Weil er konkrete Beobachtungen (Ausspülung/Grasnarbe) macht und daraus ein technisches Profil ableitet (sanfterer Abfall).",
+          "Weil er sich auf Träume und Visionen verlässt.",
+          "Weil der Amtmann es ihm diktiert.",
+          "Weil er einmal ein Lied über Deiche gehört hat."
+        ],
+        correctIndex:0,
+        hint:"Empirie: Wellenwirkung → Erosion → Profil muss verändert werden.",
+        solution:"Hauke argumentiert empirisch/technisch: Wellenwirkung → Erosion → Profil muss verändert werden."
+      },
+      {
+        id: 8, type:"mc",
+        prompt:"Welche Funktion hat der Schulmeister als Erzähler innerhalb der Wirtshausrahmung?",
+        choices:[
+          "Er vermittelt die Hauke-Geschichte als Mischung aus Fakten und Aberglauben und reflektiert dabei selbst das Problem des Erzählens.",
+          "Er ist nur der Wirt und serviert Punsch.",
+          "Er ist Haukes Sohn und berichtet aus erster Hand.",
+          "Er hat keine Rolle; er wird nur erwähnt."
+        ],
+        correctIndex:0,
+        hint:"Er ist Filter/Vermittler und thematisiert selbst Aberglauben vs. Bericht.",
+        solution:"Der Schulmeister ist Vermittler/Filter: er erzählt, kommentiert, grenzt Aberglauben an – und lässt ihn dennoch mitlaufen."
+      },
+      {
+        id: 9, type:"mc",
+        prompt:"Welche Bedeutung hat es, dass im Deichgrafenhaus die „Welt“ für Hauke klarer wird?",
+        choices:[
+          "Er gewinnt Einblick in Verwaltung/Deichrechnungen, Machtverhältnisse und erkennt, wie Technik, Politik und Dorfmentalität zusammenhängen.",
+          "Er lernt nur, wie man Enten brät.",
+          "Er verlässt jede Ambition und wird Tagelöhner.",
+          "Er wird plötzlich Seemann und segelt weg."
+        ],
+        correctIndex:0,
+        hint:"Verwaltung, Deichordnung, Schau, Gevollmächtigte – Strukturverständnis.",
+        solution:"Hauke versteht Strukturen (Ämter, Kontrolle, Schlendrian), entwickelt Einfluss und wird zur gestaltenden Kraft."
+      },
+      {
+        id: 10, type:"mc",
+        prompt:"Was ist der Effekt der wiederholten Schlaf-/Schnarchmomente des Deichgrafen während der Rechnerei?",
+        choices:[
+          "Sie zeigen behäbige Amtsführung/Trägheit: Kompetenz liegt faktisch bei Hauke/Elke, während der Amtsträger die Kontrolle verliert.",
+          "Sie beweisen, dass Hauke langweilig ist und nichts kann.",
+          "Sie sind reine Romantik-Signale ohne Funktion.",
+          "Sie dienen nur dazu, den Text künstlich zu verlängern."
+        ],
+        correctIndex:0,
+        hint:"Diskrepanz zwischen Amt und Fähigkeit – wer trägt die Arbeit?",
+        solution:"Das Schnarchen markiert die Diskrepanz zwischen Amt und Fähigkeit: Hauke/Elke tragen die Sache, der Deichgraf bleibt behäbig."
+      },
+
+      // 40 Freitext
+      {
+        id: 11, type:"ft",
+        prompt:"Erkläre in 2–4 Sätzen, warum der Textanfang (Sturmritt, Wattenmeer, Deich) sofort eine Grundspannung erzeugt.",
+        answerRule:{ anyOfContainSets:[
+          ["sturm","deich","gefahr"],
+          ["unwetter","unsicherheit","hochwasser"],
+          ["atmosphaere","bedrohung","meer"]
+        ]},
+        hint:"Nenne mindestens: Wetter/Orientierungslosigkeit + Deich/Meer + (drohende) Gefahr.",
+        solution:"Der Sturmritt setzt eine bedrohliche Atmosphäre: Wind, Dunkel, Wattenmeer und der schmale Deich machen die Lage existenziell. Der Deich ist Schutzlinie – und zugleich fragil. Damit wird das zentrale Konfliktfeld (Mensch vs. Meer/Technik/Risiko) unmittelbar aufgebaut."
+      },
+      {
+        id: 12, type:"ft",
+        prompt:"Warum betont der äußere Erzähler, er könne die „Wahrheit der Tatsachen“ nicht verbürgen? Welche Wirkung hat das?",
+        answerRule:{ anyOfContainSets:[
+          ["unzuverlaessig","ueberlieferung","legende"],
+          ["distanz","geruecht","rahmen"],
+          ["nicht verbuergen","zweifel","erzahlt"]
+        ]},
+        hint:"Stichworte: Überlieferung/Distanz/Legendencharakter/Unzuverlässigkeit.",
+        solution:"Die Betonung markiert die Geschichte als überlieferte Erzählung (Legende/Gerücht), nicht als gesicherte Chronik. Dadurch entsteht Schwebe: Aberglaube und Realität können nebeneinanderstehen, und man muss selbst unterscheiden."
+      },
+      {
+        id: 13, type:"ft",
+        prompt:"Was macht die Begegnung mit dem Reiter unheimlich? Nenne mindestens zwei konkrete Merkmale.",
+        answerRule:{ anyOfContainSets:[
+          ["lautlos","kein hufschlag","ploetzlich"],
+          ["brennende augen","bleiches antlitz","mantel"],
+          ["verschwinden","schatten","wehle"]
+        ]},
+        hint:"Denke an: Lautlosigkeit/fehlender Hufschlag, „brennende Augen“, plötzliches Vorbeisausen, Verschwinden.",
+        solution:"Unheimlich ist vor allem die Lautlosigkeit: kein Hufschlag – dennoch rast die Gestalt vorbei. Dazu kommen die „brennenden Augen“ im bleichen Gesicht und das plötzliche Verschwinden in der Dunkelheit/bei der Wehle."
+      },
+      {
+        id: 14, type:"ft",
+        prompt:"Erkläre den Begriff „Wehle“ im Kontext (funktional).",
+        answerRule:{ anyOfContainSets:[
+          ["bruch","sturmflut","teich"],
+          ["ausgerissen","land","wasser"],
+          ["deich","bruch","tiefer"]
+        ]},
+        hint:"Sturmflut reißt Land/Deich auf; zurück bleibt ein tiefer Teich.",
+        solution:"Eine Wehle ist die Folge einer Sturmflut: Wasser reißt einen Bruch ins Land; danach bleibt dort meist ein kleiner, tiefer Teich zurück – als Erinnerung an Deichversagen und Gefahr."
+      },
+      {
+        id: 15, type:"ft",
+        prompt:"Warum passt es, dass die Geschichte im Wirtshaus erzählt wird?",
+        answerRule:{ anyOfContainSets:[
+          ["gemeinschaft","muendliche","geruecht"],
+          ["austausch","deichwacht","angst"],
+          ["erzaehlen","wirtshaus","kollektiv"]
+        ]},
+        hint:"Wirtshaus = mündliche Überlieferung, soziale Deutung, kollektive Angst/Deichwacht.",
+        solution:"Das Wirtshaus ist sozialer Resonanzraum: Menschen verarbeiten Gefahr gemeinsam. Geschichten zirkulieren mündlich, werden gedeutet und mit Aberglauben aufgeladen – passend zum Legendencharakter."
+      },
+      {
+        id: 16, type:"ft",
+        prompt:"Beschreibe Haukes Verhältnis zu Bildung/Wissen anhand der Euklid-Episode.",
+        answerRule:{ anyOfContainSets:[
+          ["euklid","lernen","selbst"],
+          ["grammatik","verstehen","buch"],
+          ["rechnen","wissen","eigenstaendig"]
+        ]},
+        hint:"Er lernt selbständig (Grammatik → Euklid) und sucht Begründungen statt Autorität.",
+        solution:"Hauke will Gründe: Er fragt „warum“ und ist mit Autorität nicht zufrieden. Er eignet sich Wissen eigenständig an (Grammatik → Euklid) und nutzt Bildung als Werkzeug, um Welt/Deich rational zu verstehen."
+      },
+      {
+        id: 17, type:"ft",
+        prompt:"Warum schickt der Vater Hauke an den Deich – und warum wirkt das nicht wie beabsichtigt?",
+        answerRule:{ anyOfContainSets:[
+          ["kurieren","deicharbeit","euklid"],
+          ["denken","nicht vertreiben","beobachtet"],
+          ["buch","tasche","schubkarren"]
+        ]},
+        hint:"Der Vater will ihn „vom Euklid kurieren“, aber Hauke denkt/berechnet weiter und beobachtet am Deich.",
+        solution:"Der Vater will Haukes „Halbgelehrsamkeit“ durch harte Deicharbeit austreiben. Doch Hauke nimmt den Euklid mit, denkt weiter und nutzt die Arbeit als Beobachtungsfeld – seine Idee wird dadurch eher gestärkt."
+      },
+      {
+        id: 18, type:"ft",
+        prompt:"Welche Erkenntnis gewinnt Hauke durch das Beobachten der Wellen am Deich?",
+        answerRule:{ anyOfContainSets:[
+          ["erosion","ausspuelen","grasnarbe"],
+          ["profil","sanfter","abfall"],
+          ["wellen","wirkung","mechanik"]
+        ]},
+        hint:"Erosion/Ausspülung → Deichprofil zu steil → braucht sanfteren Abfall.",
+        solution:"Er erkennt die Erosionswirkung der Wellen: Die Grasnarbe wird ausspült. Daraus folgert er ein besseres Profil (sanfterer Abfall) – technische Optimierung statt Tradition."
+      },
+      {
+        id: 19, type:"ft",
+        prompt:"Was zeigt die Nebelgestalten-Szene über Haukes Verhältnis zu Aberglauben?",
+        answerRule:{ anyOfContainSets:[
+          ["zweifel","geister","furcht"],
+          ["bleibt","standhaft","beobachtet"],
+          ["erklaerung","voegel","nebel"]
+        ]},
+        hint:"Er schwankt kurz zu „Geistern“, bleibt aber standhaft und sucht später eine rationale Erklärung.",
+        solution:"Die Szene provoziert Aberglauben („Geister?“), doch Hauke flieht nicht. Er bleibt, beobachtet und ordnet das Phänomen später als Täuschung (Vögel im Nebel) ein – Skepsis statt Hingabe an Angst."
+      },
+      {
+        id: 20, type:"ft",
+        prompt:"Warum ist die Angorakater-Episode mehr als eine Nebenepisode?",
+        answerRule:{ anyOfContainSets:[
+          ["impuls","gewalt","schuld"],
+          ["fluch","geruecht","trien"],
+          ["sozial","eskalation","ruf"]
+        ]},
+        hint:"Charakter: Härte/Impuls. Dorf: Fluch/Gerücht/soziale Eskalation.",
+        solution:"Die Episode zeigt Haukes harte Impulsivität und erzeugt moralische Schuld. Gleichzeitig setzt sie Dorfmechaniken in Gang (Fluch, Gerüchte), die später Legendenbildung und Feindbilder vorbereiten."
+      },
+      // 21–50 (weiter anspruchsvoll)
+      {
+        id: 21, type:"ft",
+        prompt:"Welche Funktion hat Trien’ Jans’ Fluchrede für die Erzählwelt?",
+        answerRule:{ anyOfContainSets:[
+          ["aberglaube","zeichen","schicksal"],
+          ["schuld","deutung","gemeinschaft"],
+          ["legende","auflaedt","unheil"]
+        ]},
+        hint:"Sie lädt Handlungen symbolisch auf: Schuld, Zeichen, Aberglauben, Legendenlogik.",
+        solution:"Die Fluchrede verschiebt eine konkrete Tat in eine symbolische Sphäre: Schuld wird „schicksalhaft“. So entsteht eine Welt, in der Zeichen/Unheilserwartung plausibel werden – wichtig für die spätere Schimmelreiter-Legende."
+      },
+      {
+        id: 22, type:"ft",
+        prompt:"Warum bezahlt Tede Haien Trien’ Jans und was sagt das über seine Haltung?",
+        answerRule:{ anyOfContainSets:[
+          ["kompensation","ruhe","pragmatisch"],
+          ["schaden","begrenzen","ruf"],
+          ["taler","konflikt","loesen"]
+        ]},
+        hint:"Pragmatismus: Schaden begrenzen, Ruhe kaufen, soziale Kontrolle.",
+        solution:"Er kompensiert den Verlust pragmatisch und verhindert Eskalation. Das zeigt nüchterne Konfliktlösung und Sorge um Ordnung/Ruf mehr als moralische Empörung."
+      },
+      {
+        id: 23, type:"ft",
+        prompt:"Erkläre den Gegensatz „Deichgraf durch Herkunft“ vs. „Kompetenz durch Leistung“.",
+        answerRule:{ anyOfContainSets:[
+          ["herkunft","amt","familie"],
+          ["delegiert","rechnet","kompetenz"],
+          ["schlendrian","leistung","hauke"]
+        ]},
+        hint:"Amt/Herkunft – Kompetenz liegt faktisch bei anderen (Schulmeister/Hauke/Elke).",
+        solution:"Der Deichgraf ist im Amt durch Familie/Status; fachliche Arbeit wird delegiert. Kompetenz/Leistung kommt von Hauke/Elke – dadurch wird eine Kritik an träger Amtsautorität sichtbar."
+      },
+      {
+        id: 24, type:"ft",
+        prompt:"Warum ist Elke für Hauke funktional eine Schlüsselperson (nicht nur romantisch)?",
+        answerRule:{ anyOfContainSets:[
+          ["ordnung","rechnen","verwaltung"],
+          ["unterstuetzt","vermittelt","ole"],
+          ["kompetent","team","praxis"]
+        ]},
+        hint:"Kompetenz, Ordnungssinn, Vermittlung (Ole), Zusammenarbeit.",
+        solution:"Elke ist kompetent, ordnet Verwaltung/Haushalt und erkennt Haukes Fähigkeiten. Sie vermittelt Konflikte (v.a. mit Ole) und macht Haukes Arbeit im System überhaupt erst nachhaltig möglich."
+      },
+      {
+        id: 25, type:"ft",
+        prompt:"Warum ist Haukes Kritik an kleinen Deichmängeln (Unkraut/Wiege) mehr als Pedanterie?",
+        answerRule:{ anyOfContainSets:[
+          ["schwachstelle","sturmflut","risiko"],
+          ["praevention","sicherheit","folgen"],
+          ["klein","gross","katastrophe"]
+        ]},
+        hint:"Kleine Mängel werden bei Sturmflut zu kritischen Schwachstellen.",
+        solution:"Hauke denkt in Systemrisiken: Was klein wirkt, kann bei Sturmflut zur Schwachstelle werden. Seine Genauigkeit ist Prävention – er verbindet Detailpflege mit Sicherheit und Verantwortung."
+      },
+      {
+        id: 26, type:"ft",
+        prompt:"Warum ist Aberglaube im Text funktional ernst zu nehmen (nicht nur lächerlich)?",
+        answerRule:{ anyOfContainSets:[
+          ["angst","sinn","ordnung"],
+          ["unsicherheit","deutung","gefahr"],
+          ["gemeinschaft","handlungsleitend","zeichen"]
+        ]},
+        hint:"Aberglaube ist Deutungsstrategie in Unsicherheit/Gefahr; stiftet Sinn/Ordnung.",
+        solution:"Aberglaube bietet Deutung und emotionale Ordnung in einer Welt realer Gefahr. Er erklärt Unkalkulierbares, bindet Gemeinschaft und wirkt handlungsleitend – deshalb ist er erzählfunktional."
+      },
+      {
+        id: 27, type:"ft",
+        prompt:"Beschreibe den Konflikt „Innovation vs. Tradition“ am Deich in einem präzisen Satz.",
+        answerRule:{ anyOfContainSets:[
+          ["innovation","tradition","deich"],
+          ["berechnung","gewohnheit","widerstand"],
+          ["verbessern","schlendrian","blockiert"]
+        ]},
+        hint:"Ein Satz mit klarer Gegenüberstellung: Haukes Verbesserung vs. altes Muster/Schlendrian.",
+        solution:"Haukes berechnete Deichverbesserung stößt auf alte Gewohnheiten, Besitzdenken und Schlendrian, die Risiken unterschätzen und Veränderungen blockieren."
+      },
+      {
+        id: 28, type:"ft",
+        prompt:"Warum ist Oles „Maulfertigkeit“ in der Dorfdynamik so mächtig?",
+        answerRule:{ anyOfContainSets:[
+          ["stimmung","geruechte","macht"],
+          ["netzwerk","oeffentlichkeit","kontrolle"],
+          ["deutung","feindbild","mobilisieren"]
+        ]},
+        hint:"Er steuert Stimmung/Netzwerk; er verbreitet Deutungen, stachelt Widerwillen an.",
+        solution:"Maulfertigkeit erzeugt soziale Macht: Ole kann Deutungen setzen, Gerüchte streuen und Gruppen mobilisieren. So wird Hauke angreifbar, obwohl er fachlich überlegen ist."
+      },
+      {
+        id: 29, type:"ft",
+        prompt:"Erkläre kurz die Bedeutung des Satzes, man könne „mit zwei Augen nicht wie mit hundert sehen“ (sinngemäß).",
+        answerRule:{ anyOfContainSets:[
+          ["ueberforderung","amt","kontrolle"],
+          ["verantwortung","zu viel","unmoeglich"],
+          ["systemkritik","delegation","schlendrian"]
+        ]},
+        hint:"Amt ist komplex/überfordernd; Systemkritik: Man soll zu viel mit zu wenig Überblick leisten.",
+        solution:"Der Satz markiert strukturelle Überforderung: Ein Deichgraf soll alles sehen/kontrollieren, was real unmöglich ist. Das erklärt Delegation, Kontrolllücken und damit auch Schlendrian – eine Systemkritik."
+      },
+      {
+        id: 30, type:"ft",
+        prompt:"Warum ist die Gegenüberstellung „behagliches Haus“ vs. „tobende Natur draußen“ zentral?",
+        answerRule:{ anyOfContainSets:[
+          ["illusion","kontrolle","naturgewalt"],
+          ["innen","sicherheit","aussen gefahr"],
+          ["deich","fragil","schutz"]
+        ]},
+        hint:"Innen scheint sicher, aber Sicherheit hängt fragil am Deich; Naturgewalt relativiert Kontrolle.",
+        solution:"Innen entsteht die Illusion von Kontrolle (Ordnung, Licht, Wärme), doch sie ist fragil: Sie existiert nur, solange der Deich hält. Draußen zeigt Naturgewalt die Grenzen menschlicher Kontrolle."
+      },
+      {
+        id: 31, type:"ft",
+        prompt:"Zeige an einem Beispiel, wie „Sehen“ im Text als Kompetenz markiert wird.",
+        answerRule:{ anyOfContainSets:[
+          ["hauke","sieht","maengel"],
+          ["deich","beobachtet","wellen"],
+          ["erkennt","schwachstellen","praevention"]
+        ]},
+        hint:"Hauke sieht Mängel am Deich (Unkraut/Wiege/Erosion) und zwingt Handeln.",
+        solution:"Hauke erkennt durch Beobachtung Schwachstellen (Erosion, Profil, Pflege). Dieses Sehen erzeugt Handlung und Machtverschiebung: Kompetenz zeigt sich als genauer Blick."
+      },
+      {
+        id: 32, type:"ft",
+        prompt:"Welche Wirkung hat die präzise Beschreibung der Deichgrafenstube (Kacheln, Uhr, Wandbett)?",
+        answerRule:{ anyOfContainSets:[
+          ["status","behaglichkeit","macht"],
+          ["kontrast","gefahr draussen","sicherheit"],
+          ["material","ordnung","amt"]
+        ]},
+        hint:"Status/Behaglichkeit innen vs. Gefahr draußen; Amt und Besitz als Machtbasis.",
+        solution:"Die Stube zeigt Status, Behaglichkeit und Ordnung als Machtbasis. Sie kontrastiert mit der Gefahr draußen und macht sichtbar, wie sehr Sicherheit von Infrastruktur (Deich) abhängt."
+      },
+      {
+        id: 33, type:"ft",
+        prompt:"Warum provoziert Haukes Aussage „Unsere Deiche sind nichts wert“ (sinngemäß) so stark?",
+        answerRule:{ anyOfContainSets:[
+          ["angriff","lebensleistung","autoritaet"],
+          ["scham","abwehr","tradition"],
+          ["existenz","gefahr","ersaufen"]
+        ]},
+        hint:"Angriff auf Lebensleistung/Tradition/Autorität; macht existentielle Gefahr offen sichtbar.",
+        solution:"Der Satz entwertet die vertraute Ordnung und damit die Lebensleistung/Autorität der Älteren. Er macht die Gefahr offen sichtbar und erzeugt Scham/Abwehr – darum wirkt er wie persönlicher Angriff."
+      },
+      {
+        id: 34, type:"ft",
+        prompt:"Warum passt der Deich als Symbol besonders gut zur Frage nach individueller vs. kollektiver Verantwortung?",
+        answerRule:{ anyOfContainSets:[
+          ["kollektiv","schutz","alle"],
+          ["pflege","kontrolle","viele"],
+          ["deichgraf","verantwortung","personifiziert"]
+        ]},
+        hint:"Der Deich schützt alle; Vernachlässigung trifft alle; Verantwortung ist verteilt und doch personifiziert.",
+        solution:"Der Deich schützt alle – Versagen betrifft alle. Verantwortung ist verteilt (Pflege/Schau), wird aber zugleich in Ämtern personifiziert (Deichgraf). Das macht Schuldfragen erzählbar."
+      },
+      {
+        id: 35, type:"ft",
+        prompt:"Welche Funktion hat Gerüchtbildung in der Dorföffentlichkeit?",
+        answerRule:{ anyOfContainSets:[
+          ["geruecht","kontrolle","stimmung"],
+          ["feindbild","zuordnung","schuld"],
+          ["mobilisieren","gruppe","druck"]
+        ]},
+        hint:"Gerücht steuert Stimmung: Neid, Widerwillen, informelle Kontrolle.",
+        solution:"Gerüchte ordnen Ursachen Personen zu, erzeugen Feindbilder und steuern Gruppenstimmung. Sie sind informelle Kontrolle und Mobilisierung gegen Abweichler."
+      },
+      {
+        id: 36, type:"ft",
+        prompt:"Warum wird Technik (Deichbau/Rechnen) im Text moralisch aufgeladen?",
+        answerRule:{ anyOfContainSets:[
+          ["technik","leben","tod"],
+          ["folgen","schuld","verantwortung"],
+          ["entscheidung","sicherheit","gemeinschaft"]
+        ]},
+        hint:"Weil technische Entscheidungen reale Folgen (Leben/Tod) haben.",
+        solution:"Technische Entscheidungen entscheiden über Sicherheit, Verlust und Tod. Deshalb kippt Technik in Verantwortung – und wird moralisch und schuldrelevant."
+      },
+      {
+        id: 37, type:"ft",
+        prompt:"Warum ist Haukes Aufstieg erzählerisch glaubwürdig (statt willkürlich)?",
+        answerRule:{ anyOfContainSets:[
+          ["entwicklung","lernen","praxis"],
+          ["kompetenz","beobachtung","arbeit"],
+          ["legitimiert","schrittweise","einfluss"]
+        ]},
+        hint:"Kompetenz wird aufgebaut/legitimiert; Aufstieg wirkt verdient.",
+        solution:"Hauke wird zunächst als Arbeiter/Beobachter gezeigt, lernt Praxis und System. Seine Kompetenz wächst schrittweise, sodass Einfluss als verdient und folgerichtig erscheint."
+      },
+      {
+        id: 38, type:"ft",
+        prompt:"Formuliere eine These (1 Satz), wie „Natur“ im Text gegen menschliche Kontrollfantasien arbeitet.",
+        answerRule:{ anyOfContainSets:[
+          ["natur","relativiert","kontrolle"],
+          ["sturmflut","unberechenbar","grenzen"],
+          ["illusion","schutz","fragil"]
+        ]},
+        hint:"Natur ist unberechenbar und zeigt Grenzen menschlicher Kontrolle.",
+        solution:"Die Natur (Sturmflut, Meer) zeigt die Grenzen menschlicher Kontrolle und macht Behaglichkeit zur fragilen Illusion, die jederzeit brechen kann."
+      },
+      {
+        id: 39, type:"ft",
+        prompt:"Warum taucht der Schimmelreiter gerade in Hochwasserkontexten als Figur/Zeichen auf?",
+        answerRule:{ anyOfContainSets:[
+          ["vorzeichen","warnung","hochwasser"],
+          ["kollektive angst","symbol","unheil"],
+          ["schuld","deich","risiko"]
+        ]},
+        hint:"Vorzeichen/Warnfigur; symbolisiert kollektive Angst/Schuld/Deichrisiko.",
+        solution:"Weil Hochwasser die existentielle Bedrohung ist, wird die Gestalt zum Vorzeichen. Sie bündelt Angst und Unheilserwartung und funktioniert als symbolische Warnfigur in Momenten maximaler Unsicherheit."
+      },
+      {
+        id: 40, type:"ft",
+        prompt:"Schreibe eine Mini-Zusammenfassung (max. 4 Sätze) der Konstellation: Meer – Deich – Dorf – Hauke.",
+        answerRule:{ anyOfContainSets:[
+          ["meer","gefahr","deich"],
+          ["dorf","schlendrian","aberglaube"],
+          ["hauke","technik","verantwortung"]
+        ]},
+        hint:"Muss alle vier Elemente enthalten und ihre Beziehung klar machen.",
+        solution:"Das Meer ist dauernde Bedrohung, der Deich der fragile Schutz. Das Dorf lebt zwischen Routine, Besitzlogik und Aberglauben. Hauke bringt technische Kompetenz und Verantwortungsdenken ein – und gerät dadurch in Konflikt mit Kräften, die Veränderung hemmen."
+      },
+      // 41–50: zusätzliche anspruchsvolle Freitextfragen (vollständig)
+      {
+        id: 41, type:"ft",
+        prompt:"Warum kann man die Rahmung als „Legendenmaschine“ bezeichnen (1–2 Sätze)?",
+        answerRule:{ anyOfContainSets:[
+          ["rahmen","ueberlieferung","geruecht"],
+          ["legende","filter","unsicherheit"],
+          ["wirtshaus","muendlich","weitergeben"]
+        ]},
+        hint:"Überlieferung + Filter + mündliches Weitergeben erzeugen Legendencharakter.",
+        solution:"Weil im Rahmen mündliche Überlieferung, Gerücht und Erzählerfilter zusammenwirken. Das produziert Unsicherheit und macht aus Ereignissen eine Legende."
+      },
+      {
+        id: 42, type:"ft",
+        prompt:"Nenne zwei Gründe, warum Haukes Rationalität soziale Konflikte verschärft.",
+        answerRule:{ anyOfContainSets:[
+          ["demuetigt","tradition","kritik"],
+          ["bedroht","macht","status"],
+          ["sprache","stille","wirkt ueberheblich"]
+        ]},
+        hint:"Kritik entwertet Tradition/Status; Kompetenz bedroht Macht; stille Art wirkt leicht überheblich.",
+        solution:"Er entwertet Tradition durch sachliche Kritik und bedroht damit Status/Macht. Zudem wirkt seine stille, nüchterne Art auf andere wie Überlegenheit – das verstärkt Widerstand."
+      },
+      {
+        id: 43, type:"ft",
+        prompt:"Wie wird „Angst“ im Dorf in „Wissen“ umgewandelt (Mechanismus)?",
+        answerRule:{ anyOfContainSets:[
+          ["zeichen","geruecht","aberglaube"],
+          ["erzaehlen","deuten","gemeinschaft"],
+          ["unheil","vorzeichen","ordnung"]
+        ]},
+        hint:"Gefahr wird über Zeichen/Gerüchte/Aberglauben deutbar gemacht.",
+        solution:"Angst wird durch Deutung in Zeichenwissen verwandelt: Gerüchte, Vorzeichen und Aberglauben liefern Erklärungen. So entsteht Ordnung in Unsicherheit – auch wenn sie irrational ist."
+      },
+      {
+        id: 44, type:"ft",
+        prompt:"Warum ist „Detailarbeit“ am Deich im Text eine Form von Ethik?",
+        answerRule:{ anyOfContainSets:[
+          ["detail","praevention","verantwortung"],
+          ["pflege","sicherheit","gemeinschaft"],
+          ["klein","gross","folgen"]
+        ]},
+        hint:"Detailpflege verhindert Katastrophen; Verantwortung zeigt sich im Kleinen.",
+        solution:"Weil kleine Pflegehandlungen Katastrophen verhindern können. Ethik zeigt sich als Sorgfalt und Prävention – Verantwortung wird im Detail sichtbar."
+      },
+      {
+        id: 45, type:"ft",
+        prompt:"Weshalb kann man sagen: Der Deich ist „Infrastruktur + Mythos“?",
+        answerRule:{ anyOfContainSets:[
+          ["infrastruktur","schutz","technik"],
+          ["mythos","zeichen","legende"],
+          ["beides","real","symbol"]
+        ]},
+        hint:"Realer Schutzbau + symbolische Aufladung (Zeichen, Legende, Schuld).",
+        solution:"Der Deich ist realer Schutzbau (Technik/Infrastruktur) und zugleich symbolisch überhöht: Er trägt Deutungen von Schuld, Angst, Zeichen und Legende."
+      },
+      {
+        id: 46, type:"ft",
+        prompt:"Was leistet die Naturbeschreibung für die Figurenpsychologie (z.B. Hauke)?",
+        answerRule:{ anyOfContainSets:[
+          ["spiegel","inneres","zustand"],
+          ["druck","bedrohung","trieb"],
+          ["atmosphaere","motiviert","handeln"]
+        ]},
+        hint:"Natur erzeugt Druck/Atmosphäre, spiegelt inneren Zustand und motiviert Handeln.",
+        solution:"Naturbeschreibung erzeugt Druck und Atmosphäre, die Figuren handeln lässt. Sie spiegelt oft inneren Zustand (Faszination/Angst) und macht Motivation (Kontrolle, Schutz) plausibel."
+      },
+      {
+        id: 47, type:"ft",
+        prompt:"Warum ist der Konflikt nicht nur „persönlich“, sondern strukturell?",
+        answerRule:{ anyOfContainSets:[
+          ["struktur","amt","macht"],
+          ["besitz","gemeinschaft","ordnung"],
+          ["system","innovation","blockade"]
+        ]},
+        hint:"Es geht um Amt, Besitz, Macht, Systemträgheit – nicht nur um Sympathie.",
+        solution:"Weil Amt, Besitzlogik und Machtverhältnisse Veränderungen blockieren. Der Widerstand gegen Hauke ist Teil von Systemträgheit – nicht nur persönlicher Antipathie."
+      },
+      {
+        id: 48, type:"ft",
+        prompt:"Formuliere einen Satz, der Haukes „Projekt“ beschreibt (ohne Namen aufzuzählen).",
+        answerRule:{ anyOfContainSets:[
+          ["deich","verbessern","berechnen"],
+          ["sicherheit","langfristig","praevention"],
+          ["gegen","schlendrian","system"]
+        ]},
+        hint:"Deich verbessern (berechnet), langfristige Sicherheit, gegen Schlendrian.",
+        solution:"Haukes Projekt ist, den Deich nach Beobachtung und Berechnung so zu verbessern, dass langfristige Sicherheit entsteht – gegen Schlendrian und kurzfristiges Denken."
+      },
+      {
+        id: 49, type:"ft",
+        prompt:"Warum ist „Erzählen“ selbst ein Thema (Meta-Ebene) im Textanfang?",
+        answerRule:{ anyOfContainSets:[
+          ["erzaehler","kommentiert","erzählen"],
+          ["nicht verbuergen","filter","auswahl"],
+          ["aberglaube","fakten","spannung"]
+        ]},
+        hint:"Erzähler kommentiert Wahrheit/Filter/Auswahl und hält Fakten/Aberglauben in Spannung.",
+        solution:"Weil der Erzähler seine eigene Zuverlässigkeit problematisiert („nicht verbürgen“) und damit Filter/Auswahl sichtbar macht. Erzählen wird als Prozess zwischen Fakt und Aberglauben thematisiert."
+      },
+      {
+        id: 50, type:"ft",
+        prompt:"Gib eine präzise Aussage (1 Satz), warum das Motiv „Vorzeichen“ im Roman so wirksam ist.",
+        answerRule:{ anyOfContainSets:[
+          ["unsicherheit","zeichen","deutung"],
+          ["angst","kontrolle","vorwegnehmen"],
+          ["gemeinsam","sinn","unheil"]
+        ]},
+        hint:"Vorzeichen machen Unsicherheit deutbar und binden Angst an Sinn/Erwartung.",
+        solution:"Vorzeichen sind wirksam, weil sie Unsicherheit in deutbare Erwartungen verwandeln und kollektive Angst an Sinn und Handlung (Deichwacht, Schuld, Unheil) binden."
+      }
+    ];
+
+    const state = {
+      order: [],
+      idx: 0,
+      selectedChoice: null,
+      attemptsOnThis: 0,
+      score: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      hintShownCount: 0,
+      locked: false,
+    };
+
+    // Timing: Musterlösung länger sichtbar
+    const AUTO_NEXT_RIGHT_MS = 1300;
+    const AUTO_NEXT_SOLUTION_MS = 5200;
+
+    const qIndexPill = document.getElementById("qIndexPill");
+    const scorePill = document.getElementById("scorePill");
+    const progressFill = document.getElementById("progressFill");
+
+    const qTypeBadge = document.getElementById("qTypeBadge");
+    const qText = document.getElementById("qText");
+
+    const mcArea = document.getElementById("mcArea");
+    const ftArea = document.getElementById("ftArea");
+    const choicesEl = document.getElementById("choices");
+    const textAnswer = document.getElementById("textAnswer");
+
+    const feedbackBox = document.getElementById("feedbackBox");
+    const feedbackLine = document.getElementById("feedbackLine");
+    const solutionBox = document.getElementById("solutionBox");
+    const solutionText = document.getElementById("solutionText");
+
+    const checkBtn = document.getElementById("checkBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const quizCard = document.getElementById("quizCard");
+    const endCard = document.getElementById("endCard");
+    const restartBtn = document.getElementById("restartBtn");
+
+    const statCorrect = document.getElementById("statCorrect");
+    const statWrong = document.getElementById("statWrong");
+    const statScore = document.getElementById("statScore");
+    const statHints = document.getElementById("statHints");
+
+    function hardReset(){
+      state.order = shuffle([...Array(QUESTIONS.length).keys()]);
+      state.idx = 0;
+      state.selectedChoice = null;
+      state.attemptsOnThis = 0;
+      state.score = 0;
+      state.correctCount = 0;
+      state.wrongCount = 0;
+      state.hintShownCount = 0;
+      state.locked = false;
+
+      endCard.classList.remove("show");
+      quizCard.style.display = "";
+      render();
+    }
+
+    function currentQuestion(){
+      return QUESTIONS[state.order[state.idx]];
+    }
+
+    function setProgress(){
+      const qNo = state.idx + 1;
+      qIndexPill.textContent = String(qNo);
+      scorePill.textContent = String(state.score);
+      progressFill.style.width = (qNo / QUESTIONS.length * 100).toFixed(2) + "%";
+    }
+
+    function clearFeedback(){
+      feedbackBox.classList.remove("show");
+      feedbackLine.textContent = "";
+      solutionBox.classList.remove("show");
+      solutionText.textContent = "";
+      nextBtn.disabled = true;
+    }
+
+    function setFeedback(html){
+      feedbackBox.classList.add("show");
+      feedbackLine.innerHTML = html;
+    }
+
+    function render(){
+      if(state.idx >= QUESTIONS.length){
+        showEnd();
+        return;
+      }
+
+      state.locked = false;
+      checkBtn.disabled = false;
+      nextBtn.disabled = true;
+
+      const q = currentQuestion();
+      state.selectedChoice = null;
+      state.attemptsOnThis = 0;
+
+      setProgress();
+      clearFeedback();
+
+      qTypeBadge.textContent = (q.type === "mc") ? "Multiple Choice (10)" : "Freitext (40)";
+      qText.textContent = q.prompt;
+
+      if(q.type === "mc"){
+        mcArea.style.display = "";
+        ftArea.style.display = "none";
+        textAnswer.value = "";
+
+        const indexed = q.choices.map((text, i) => ({text, i}));
+        const shuffled = shuffle(indexed);
+        q._shuffled = shuffled;
+        choicesEl.innerHTML = "";
+        shuffled.forEach((c, pos) => {
+          const div = document.createElement("div");
+          div.className = "choice";
+          div.setAttribute("role","button");
+          div.setAttribute("tabindex","0");
+          div.dataset.pos = String(pos);
+          div.innerHTML = `
+            <div class="bullet" aria-hidden="true"><span></span></div>
+            <div class="choiceText">${c.text}</div>
+          `;
+          div.addEventListener("click", () => selectChoice(pos));
+          div.addEventListener("keydown", (e) => {
+            if(e.key === "Enter" || e.key === " "){
+              e.preventDefault();
+              selectChoice(pos);
+            }
+          });
+          choicesEl.appendChild(div);
+        });
+      } else {
+        mcArea.style.display = "none";
+        ftArea.style.display = "";
+        textAnswer.value = "";
+        setTimeout(() => textAnswer.focus(), 50);
+      }
+    }
+
+    function selectChoice(pos){
+      if(state.locked) return;
+      state.selectedChoice = pos;
+      [...document.querySelectorAll(".choice")].forEach(el => {
+        el.classList.toggle("selected", el.dataset.pos === String(pos));
+      });
+    }
+
+    function isCorrectFT(q, userAnswer){
+      if(!userAnswer || !userAnswer.trim()) return false;
+      return matchesRule(userAnswer, q.answerRule);
+    }
+
+    function showSolution(q){
+      solutionText.textContent = q.solution;
+      solutionBox.classList.add("show");
+    }
+
+    function handleCorrect(){
+      state.correctCount += 1;
+      state.score += 1;
+      scorePill.textContent = String(state.score);
+
+      setFeedback(`<span class="tag good">Richtig!</span> Weiter geht’s …`);
+      state.locked = true;
+      checkBtn.disabled = true;
+      nextBtn.disabled = true;
+
+      setTimeout(() => {
+        goNext();
+      }, AUTO_NEXT_RIGHT_MS);
+    }
+
+    function handleWrong(q){
+      state.wrongCount += 1;
+      state.attemptsOnThis += 1;
+
+      if(state.attemptsOnThis === 1){
+        setFeedback(`<span class="tag bad">Falsch.</span> Versuch es noch einmal.`);
+      } else if(state.attemptsOnThis === 2){
+        state.hintShownCount += 1;
+        setFeedback(`<span class="tag bad">Falsch.</span> <span class="tag hint">Hinweis</span> ${q.hint}`);
+      } else {
+        setFeedback(`<span class="tag bad">Falsch.</span> <span class="tag hint">Musterlösung</span> wird eingeblendet …`);
+        showSolution(q);
+        state.locked = true;
+        checkBtn.disabled = true;
+        nextBtn.disabled = true;
+
+        setTimeout(() => {
+          goNext();
+        }, AUTO_NEXT_SOLUTION_MS);
+      }
+    }
+
+    function check(){
+      if(state.locked) return;
+
+      const q = currentQuestion();
+
+      if(q.type === "mc"){
+        if(state.selectedChoice === null){
+          setFeedback(`<span class="tag hint">Hinweis</span> Bitte eine Antwort auswählen.`);
+          return;
+        }
+        const chosen = q._shuffled[state.selectedChoice];
+        const isRight = (chosen.i === q.correctIndex);
+        if(isRight) handleCorrect();
+        else handleWrong(q);
+      } else {
+        const ans = textAnswer.value;
+        const isRight = isCorrectFT(q, ans);
+        if(isRight) handleCorrect();
+        else handleWrong(q);
+      }
+    }
+
+    function goNext(){
+      state.idx += 1;
+      if(state.idx >= QUESTIONS.length) showEnd();
+      else render();
+    }
+
+    function showEnd(){
+      quizCard.style.display = "none";
+      endCard.classList.add("show");
+      statCorrect.textContent = String(state.correctCount);
+      statWrong.textContent = String(state.wrongCount);
+      statScore.textContent = String(state.score);
+      statHints.textContent = String(state.hintShownCount);
+
+      progressFill.style.width = "100%";
+      qIndexPill.textContent = String(QUESTIONS.length);
+      scorePill.textContent = String(state.score);
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if(state.locked) return;
+      goNext();
+    });
+
+    checkBtn.addEventListener("click", check);
+    resetBtn.addEventListener("click", hardReset);
+    restartBtn.addEventListener("click", () => {
+      quizCard.style.display = "";
+      hardReset();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if(endCard.classList.contains("show")) return;
+
+      if(e.key === "Enter"){
+        if(state.locked) return;
+        const active = document.activeElement;
+        const isChoice = active && active.classList && active.classList.contains("choice");
+        if(!isChoice){
+          e.preventDefault();
+          check();
+        }
+      }
+    });
+
+    hardReset();
+  </script>
+</body>
+</html>
